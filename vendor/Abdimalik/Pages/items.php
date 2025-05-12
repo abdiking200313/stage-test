@@ -1,7 +1,21 @@
 <?php
 require_once __DIR__ . '/../database/connection.php';
 
-// Query voor menu items met menu naam
+
+
+if (isset($_GET['delete'])) {
+    $id = intval($_GET['delete']);
+    $stmt = $conn->prepare("DELETE FROM menu_items WHERE id = ?");
+    $stmt->bind_param("i", $id);
+    if ($stmt->execute()) {
+
+        echo '<div class="alert alert-success text-center mb-0">Menu item succesvol verwijderd.</div>';
+    } else {
+        echo '<div class="alert alert-danger text-center mb-0">Fout bij verwijderen: ' . htmlspecialchars($conn->error) . '</div>';
+    }
+    $stmt->close();
+}
+
 $sql = "SELECT 
             menu_items.id,
             menu_items.naam AS item_naam,
@@ -52,6 +66,11 @@ $result = $conn->query($sql);
                             <td><?= htmlspecialchars($row['item_naam']) ?></td>
                             <td><?= htmlspecialchars($row['beschrijving']) ?></td>
                             <td>&euro; <?= number_format($row['prijs'], 2, ',', '.') ?></td>
+                            <td><a href="?delete=<?= $row['id'] ?>" 
+                 class="btn btn-sm btn-danger"
+                 onclick="return confirm('Weet je zeker dat je dit item wilt verwijderen?');">
+                 Verwijder
+              </a></td>
                           </tr>
                         <?php endwhile; ?>
                     <?php else: ?>
